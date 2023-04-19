@@ -1,8 +1,4 @@
-#!/usr/bin/env node
-
-/**
- * Module dependencies.
- */
+require('dotenv').config()
 
 var app = require('../app');
 var debug = require('debug')('simple-multifactor-auth:server');
@@ -25,7 +21,10 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
+server.listen(port, (err) => {
+  if(err) throw err
+  console.log(`Server is running on the port ${port}`)
+});
 server.on('error', onError);
 server.on('listening', onListening);
 
