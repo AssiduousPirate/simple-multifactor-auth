@@ -1,8 +1,11 @@
-let express = require('express')
-let router = express.Router()
+const express = require("express")
+const router = express.Router()
+const fs = require("fs")
+let routes = fs.readdirSync(__dirname)
 
-router.get('/', function(req, res, next) {
-    res.render('index', { title: 'Okta Authentication' })
+routes.forEach((route) => {
+	if (route === "index.js") return
+	console.log(route)
+	router.use(`/${route}`, require(`./${route}`))
 })
-
 module.exports = router
