@@ -3,4 +3,8 @@ extends layout
 block content
     h1= title
     p Welcome to #{title}
-    p Click #[a(href="/auth/dashboard") here] to view your dashboard
+    form(action='/register', method='POST')
+        p Please enter your email to view your dashboard
+        label(for='email') Email:
+        input(type='email', id='email', name='email', placeholder='Enter your email', required)
+        input(type='submit', value='Next')

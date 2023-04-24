@@ -4,7 +4,8 @@ let path = require('path')
 let cookieParser = require('cookie-parser')
 let logger = require('morgan')
 const session = require('express-session')
-const oidc = require("./utils/auth")
+const { Response } = require("./lib/Http-Responses/index")
+const { __ } = require("./lib/i18n/language/index")
 
 let app = express()
 
@@ -13,8 +14,6 @@ app.use(session({
     resave: true,
     saveUninitialized: true,
 }))
-
-app.use(oidc.router)
 
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'jade')
@@ -37,7 +36,31 @@ app.use(function(err, req, res, next) {
     res.render('error')
 })
 
-app.use("/", require("./routes"))
+app.use(function(req, res, next){
+	res.setHeader("Access-Control-Allow-Origin", "*")
+	res.setHeader(
+		"Access-Control-Allow-Headers", 
+		"Origin, X-Request-With, Content-Type, Accept, Authorization"
+		)
+	res.setHeader(
+		"Access-Control-Allow-Methods",
+		"GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		)
+	res.setHeader("Access-Control-Allow-Credentials", true)
+	if (res.method == "OPTIONS") {
+		return res.status("204").send("OK")
+	}
+	next()
+})
 
+app.use(function(req, res, next){
+	req.__ = __
+	for(const method in Response){
+		if (Response.hasOwnProperty(method)) res[method] = Response[method]
+	}
+    next()
+})
+
+app.use("/", require("./routes"))
 
 module.exports = app

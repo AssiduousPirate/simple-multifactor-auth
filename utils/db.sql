@@ -1,10 +1,11 @@
-CREATE DATABSE `okta_node_mfa`;
+CREATE DATABASE `okta_node_mfa`;
 
 USE 'okta_node_mfa';
 
 CREATE TABLE `okta_node_mfa`.`temp_users` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(45) NULL,
+    `firstName` VARCHAR(45) NULL,
+    `lastName` VARCHAR(45) NULL,
     `email` VARCHAR(75) NULL,
     `username` VARCHAR(45) NULL,
     `password` VARCHAR(95) NULL,
@@ -24,7 +25,8 @@ CREATE TABLE `okta_node_mfa`.`temp_users` (
 
 CREATE TABLE `okta_node_mfa`.`users` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(45) NULL,
+    `firstName` VARCHAR(45) NULL,
+    `lastName` VARCHAR(45) NULL,
     `email` VARCHAR(75) NULL,
     `username` VARCHAR(45) NULL,
     `password` VARCHAR(95) NULL,
@@ -41,3 +43,12 @@ CREATE TABLE `okta_node_mfa`.`users` (
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`));
+
+CREATE TABLE `okta_node_mfa`.`exceptions` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `exception` VARCHAR(200) NULL DEFAULT 'null',
+    `function` VARCHAR(200) NULL DEFAULT 'null',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+);

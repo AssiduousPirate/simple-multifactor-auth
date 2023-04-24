@@ -5,7 +5,6 @@ let routes = fs.readdirSync(__dirname)
 
 routes.forEach((route) => {
 	if (route === "index.js") return
-	console.log(route)
 	router.use(`/${route}`, require(`./${route}`))
 })
 module.exports = router
