@@ -3,17 +3,22 @@ const router = express.Router()
 const AuthController = require("./AuthController")
 const { validate } = require("../../utils/validate")
 const validation = require("./AuthValidation")
-//const verifyOidc = require("../../utils/auth")
+const oidc = require("../../app")
 
 router.get(
     "/",
     AuthController.Home
 )
 
+router.get(
+    "/add-user",
+    AuthController.AddUser
+)
+
 router.post(
-    "/login",
-    validate(validation.Login),
-    AuthController.Login
+    "/register",
+    validate(validation.Register),
+    AuthController.Register
 )
 
 router.post(
@@ -24,7 +29,7 @@ router.post(
 
 router.get(
     "/dashboard",
-    //verifyOidc,
+    oidc.ensureAuthenticated(),
     AuthController.Dashboard
 )
 

@@ -11,21 +11,25 @@ class AuthController {
 			return res.badRequest(null, req.__("GENERAL_ERROR"))
         }
     }
-    
-    async Login(req, res) {
+
+    async AddUser(req, res) {
         try {
-            const factor = null
-            const { email, password } = req.body
-            const hashPassword = await bcrypt.hash(password, 10)
+            res.render('register', { title: 'Okta Authentication' })
+        } catch (err) {
+            await writePool.query("INSERT INTO `exceptions`(`exception`,`function`) VALUES ?", [[[err.message, 'Home']]]);
+			return res.badRequest(null, req.__("GENERAL_ERROR"))
+        }
+    }
+    
+    async Register(req, res) {
+        try {
+            const { firstname, lastname, email, password } = req.body
             let emailExists = await readPool.query("SELECT `id`, `email` FROM `users` WHERE `email` = ? AND `is_active` = ? AND `is_deleted` = ?", [email, 1, 0])
-            if(emailExists.length){
-                factor = signIn(email, password)
-                res.success({ factorId: factor.id })
-            } else {
+            if(!emailExists.length){
                 const newUser = {
                     profile: {
-                        firstName: 'firstName',
-                        lastName: 'lastName',
+                        firstName: firstname,
+                        lastName: lastname,
                         email: email,
                         login: email
                     },
@@ -39,16 +43,18 @@ class AuthController {
                 const user = await oktaClient.userApi.getUser({ userId: response.id })
                 const insertToSql = await writePool.query("INSERT INTO `users` (`firstName`, `lastName`, `Email`, `Password`, `username`, `given_name`, `is_active`, `is_deleted`) VALUES ?", [
                     [
-                        [user?.profile?.firstName, user?.profile?.lastName, user?.profile?.email, hashPassword, user?.profile?.username, user?.profile?.given_name, 1, 0]
+                        [user?.profile?.firstName, user?.profile?.lastName, user?.profile?.email, null, user?.profile?.username, user?.profile?.given_name, 1, 0]
                     ]
                 ])
                 if(!insertToSql) return res.badRequest(null, req.__("GENERAL_ERROR"))
-                factor = await signIn(user?.profile?.email, user?.credentials?.password)
-                res.success({ factorId: factor.id })
+                res.redirect('/auth/dashboard')
+            } else {
+                res.render("register", {
+                    message: "User alraedy exists, please login!"
+                })
             }
         } catch (err) {
-            console.log(err.message)
-            await writePool.query("INSERT INTO `exceptions`(`exception`,`function`) VALUES ?", [[[err.message, 'Login']]]);
+            await writePool.query("INSERT INTO `exceptions`(`exception`,`function`) VALUES ?", [[[err.message, 'Register']]]);
 			return res.badRequest(null, req.__("GENERAL_ERROR"))
         }
     }

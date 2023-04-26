@@ -6,14 +6,27 @@ let logger = require('morgan')
 const session = require('express-session')
 const { Response } = require("./lib/Http-Responses/index")
 const { __ } = require("./lib/i18n/language/index")
+const { ExpressOIDC } = require('@okta/oidc-middleware')
 
 let app = express()
 
 app.use(session({
     secret: process.env.APP_SECRET,
     resave: true,
-    saveUninitialized: true,
+    saveUninitialized: false,
 }))
+
+const oidc = new ExpressOIDC({
+    issuer: `https://${process.env.OKTA_OAUTH2_ISSUER}/oauth2/default`,
+    client_id: process.env.OKTA_OAUTH2_CLIENT_ID,
+    client_secret: process.env.OKTA_OAUTH2_CLIENT_SECRET,
+    appBaseUrl: `${process.env.HOST_URL}`,
+    scope: 'openid profile',
+})
+
+module.exports = oidc
+
+app.use(oidc.router)
 
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'jade')
