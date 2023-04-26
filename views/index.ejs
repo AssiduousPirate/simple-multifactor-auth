@@ -1,0 +1,12 @@
+<%- include('layout') %>
+
+<% title = title || 'My Site' %>
+
+<header>
+    <h1>Welcome to My Site</h1>
+    <p>Please log in or register to continue:</p>
+    <div class="buttons">
+        <a href="/auth/dashboard" class="button">Log In</a>
+        <a href="/auth/add-user" class="button">Register</a>
+    </div>
+</header>

@@ -29,7 +29,7 @@ module.exports = oidc
 app.use(oidc.router)
 
 app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'jade')
+app.set('view engine', 'ejs')
 
 app.use(logger('dev'))
 app.use(express.json())

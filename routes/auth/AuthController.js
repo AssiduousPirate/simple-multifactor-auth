@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs')
 class AuthController {
     async Home(req, res) {
         try {
-            res.render('index', { title: 'Okta Authentication' })
+            res.render('index', { title: 'Okta Authentication', body: "" })
         } catch (err) {
             await writePool.query("INSERT INTO `exceptions`(`exception`,`function`) VALUES ?", [[[err.message, 'Home']]]);
 			return res.badRequest(null, req.__("GENERAL_ERROR"))
@@ -14,7 +14,7 @@ class AuthController {
 
     async AddUser(req, res) {
         try {
-            res.render('register', { title: 'Okta Authentication' })
+            res.render('register', { title: 'Okta Register', body: "", errors: "" })
         } catch (err) {
             await writePool.query("INSERT INTO `exceptions`(`exception`,`function`) VALUES ?", [[[err.message, 'Home']]]);
 			return res.badRequest(null, req.__("GENERAL_ERROR"))
@@ -50,7 +50,9 @@ class AuthController {
                 res.redirect('/auth/dashboard')
             } else {
                 res.render("register", {
-                    message: "User alraedy exists, please login!"
+                    errors: req.__("USER_EXISTS"),
+                    body: "",
+                    title: "Register"
                 })
             }
         } catch (err) {
@@ -93,12 +95,13 @@ class AuthController {
     async Dashboard(req, res) {
         try {
             const { userContext } = req
+            console.log(userContext?.userinfo)
             if(!userContext){
-                res.render("register", { title: "Register Page!" })
+                res.render("register", { title: "Register Page!", body: "" })
             } else {
                 res.render("dashboard", {
                     title: `Welcome ${userContext?.userinfo.given_name}!`,
-                    userContext: userContext?.userinfo,
+                    body: userContext?.userinfo,
                 })
             }
         } catch (err) { 

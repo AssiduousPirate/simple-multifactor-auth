@@ -1,0 +1,33 @@
+<%- include('layout') %>
+
+<section>
+    <h2>Register</h2>
+    <% if (errors.length > 0) { %>
+        <div class="errors">
+        <% for (var i = 0; i < errors.length; i++) { %>
+            <h5><%= errors[i] %></h5>
+        <% } %>
+        </div>
+    <% } %>
+    <form action="/auth/register" method="post">
+        <div class="form-group">
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstname" value="" required>
+        </div>
+        <div class="form-group">
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastname" value="" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <button type="submit">Register</button>
+        </div>
+    </form>
+</section>
