@@ -1,6 +1,7 @@
 const { oidc, oktaClient, signIn, assertIssuer } = require("../../utils/auth")
 const { writePool, readPool } = require("../../utils/database")
 const bcrypt = require('bcryptjs')
+const axios = require("axios")
 
 class AuthController {
     async Home(req, res) {
@@ -14,7 +15,7 @@ class AuthController {
 
     async AddUser(req, res) {
         try {
-            res.render('register', { title: 'Okta Register', body: "", errors: "" })
+            return res.render('register', { title: 'Okta Register', body: "", errors: "" })
         } catch (err) {
             await writePool.query("INSERT INTO `exceptions`(`exception`,`function`) VALUES ?", [[[err.message, 'Home']]]);
 			return res.badRequest(null, req.__("GENERAL_ERROR"))
@@ -95,7 +96,6 @@ class AuthController {
     async Dashboard(req, res) {
         try {
             const { userContext } = req
-            console.log(userContext?.userinfo)
             if(!userContext){
                 res.render("register", { title: "Register Page!", body: "" })
             } else {
@@ -106,6 +106,60 @@ class AuthController {
             }
         } catch (err) { 
             await writePool.query("INSERT INTO `exceptions`(`exception`,`function`) VALUES ?", [[[err.message, 'Dashboard']]]);
+			return res.badRequest(null, req.__("GENERAL_ERROR"))
+        }
+    }
+
+    async Edituser(req, res) {
+        try {
+            const id = req?.userContext.userinfo.sub
+            return res.render('edit-profile', { title: 'Okta Profile', body: { id: id }, errors: "" })
+        } catch (err) {
+            console.log(err.message)
+            await writePool.query("INSERT INTO `exceptions`(`exception`,`function`) VALUES ?", [[[err.message, 'Edituser']]]);
+			return res.badRequest(null, req.__("GENERAL_ERROR"))
+        }
+    }
+
+    async Editpassword(req, res) {
+        try {
+            let { password } = req.body
+            const { id } = req.params
+            const user = await oktaClient.userApi.getUser({ userId: id })
+            if (!user) return res.render("edit-profile", { title: "Edit profile!", body: "", errors: req.__("USER_NOT_EXISTS"), })
+            
+            const apiUrl = `https://${process.env.OKTA_OAUTH2_ISSUER}/api/v1/users/${id}`
+
+            const config = {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `SSWS ${process.env.TOKEN}`,
+                },
+            }
+
+            const data = {
+                'credentials': {
+                    'password' : { 'value': password }
+                }
+            }
+
+            await axios.post(apiUrl, data, config)
+                .then((response) => {
+                    console.log(response)
+                    if(response.status !== 200) res.render("edit-profile", { title: "Edit profile!", body: "", errors: response.data.errorSummary })
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+            const { userContext } = req
+
+            res.render("dashboard", {
+                title: `Welcome ${userContext?.userinfo.given_name}!`,
+                body: userContext?.userinfo,
+            })
+        } catch (err) {
+            await writePool.query("INSERT INTO `exceptions`(`exception`,`function`) VALUES ?", [[[err.message, 'Editpassword']]]);
 			return res.badRequest(null, req.__("GENERAL_ERROR"))
         }
     }

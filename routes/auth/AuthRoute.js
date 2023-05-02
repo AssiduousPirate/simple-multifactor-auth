@@ -34,6 +34,18 @@ router.get(
 )
 
 router.get(
+    "/profile",
+    oidc.ensureAuthenticated(),
+    AuthController.Edituser
+)
+
+router.post(
+    "/edit/password/:id",
+    validate(validation.Editpassword, "params"),
+    AuthController.Editpassword
+)
+
+router.get(
     "/logout",
     AuthController.Logout
 )
